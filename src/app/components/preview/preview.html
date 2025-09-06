@@ -1,0 +1,73 @@
+<div class="preview-container">
+  <h2>Режим просмотра</h2>
+
+  @if (hasFields() && dynamicForm) {
+    <form [formGroup]="dynamicForm" (ngSubmit)="onSubmit()" class="dynamic-form">
+      @for (field of formFields(); track field.name) {
+      <div class="form-group">
+        <label [for]="field.name">{{ field.label }} @if (field.required) {<span class="required-asterisk">*</span>}</label>
+
+        @if (field.type === 'text' || field.type === 'email' || field.type === 'number') {
+          <input
+            [id]="field.name" [type]="field.type" [formControlName]="field.name" class="form-control"
+            [class.is-invalid]="isFieldInvalid(field.name)"
+          >
+        }
+
+        @if (field.type === 'textarea') {
+          <textarea
+            [id]="field.name" [formControlName]="field.name" class="form-control"
+            [class.is-invalid]="isFieldInvalid(field.name)" rows="3"
+          ></textarea>
+        }
+
+        @if (field.type === 'checkbox') {
+          <div class="form-check">
+            <input
+              [id]="field.name" type="checkbox" [formControlName]="field.name" class="form-check-input"
+              [class.is-invalid]="isFieldInvalid(field.name)"
+            >
+          </div>
+        }
+
+        @if (field.type === 'select') {
+          <select
+            [id]="field.name" [formControlName]="field.name" class="form-control"
+            [class.is-invalid]="isFieldInvalid(field.name)"
+          >
+            <option value="">-- Выберите --</option>
+            @for (option of field.options; track $index) {
+              <option [value]="option">{{ option }}</option>
+            }
+          </select>
+        }
+
+        @if (isFieldInvalid(field.name)) {
+          <div class="invalid-feedback">
+            @if (formControls[field.name].errors?.['required']) {
+              <div>Это поле обязательно для заполнения.</div>
+            }
+            @if (formControls[field.name].errors?.['email']) {
+              <div>Пожалуйста, введите корректный email.</div>
+            }
+          </div>
+        }
+      </div>
+      }
+
+      <button type="submit" class="btn btn-success">Отправить</button>
+    </form>
+  }
+  @if (!hasFields()) {
+    <div class="no-config">
+      <p>Конфигурация формы пуста. Перейдите в <a routerLink="/builder">режим конструктора</a>, чтобы добавить поля.</p>
+    </div>
+  }
+
+  @if (submittedData) {
+    <div class="submitted-data">
+      <h3>Отправленные данные:</h3>
+      <pre>{{ submittedData | json }}</pre>
+    </div>
+  }
+</div>

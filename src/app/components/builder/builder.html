@@ -1,0 +1,87 @@
+<div class="builder-container">
+  <h2>Режим конструктора</h2>
+
+  <form [formGroup]="fieldForm" (ngSubmit)="onSubmit()" class="field-form">
+    <div class="form-group">
+      <label for="type">Тип поля:</label>
+      <select id="type" formControlName="type" class="form-control">
+        @for (type of fieldTypes; track $index) {
+          <option [value]="type">{{ type }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="label">Label (Подпись):</label>
+      <input id="label" type="text" formControlName="label" class="form-control" placeholder="Введите подпись поля">
+      @if (f['label'].invalid && (f['label'].dirty || f['label'].touched)) {
+        <div class="error">
+          Label обязателен.
+        </div>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="name">Name (Техническое имя):</label>
+      <input id="name" type="text" formControlName="name" class="form-control" placeholder="Введите уникальное имя">
+      @if (f['name'].invalid && (f['name'].dirty || f['name'].touched)) {
+        <div class="error">
+          Name обязателен.
+        </div>
+      }
+    </div>
+
+    <div class="form-group checkbox">
+      <label for="required">
+        <input id="required" type="checkbox" formControlName="required"> Обязательное поле
+      </label>
+    </div>
+
+    @if (fieldForm.get('type')?.value === 'select') {
+      <div class="form-group">
+        <label for="options">Options (Опции, через запятую):</label>
+        <input id="options" type="text" formControlName="options" class="form-control" placeholder="Option1, Option2, Option3">
+      </div>
+    }
+
+    <button type="submit" class="btn btn-primary" [disabled]="fieldForm.invalid">
+      {{ editingIndex !== null ? 'Обновить поле' : 'Добавить поле' }}
+    </button>
+    @if (editingIndex !== null) {
+      <button type="button" class="btn btn-secondary" (click)="cancelEdit()">Отмена</button>
+    }
+  </form>
+
+  <div class="preview-section">
+    <h3>Превью формы:</h3>
+    <div class="field-list">
+      @for (field of formFields(); track field.name; let i = $index) {
+        <div class="field-item" animate.enter="animate-in" animate.leave="animate-out">
+          <div class="field-header">
+            <strong>{{ field.label }}</strong> ({{ field.type }}) @if (field.required) {<span class="required-asterisk">*</span>}
+            <div class="field-actions">
+              <button (click)="editField(i)" class="btn-edit">✏️</button>
+              <button (click)="deleteField(i)" class="btn-delete">🗑️</button>
+            </div>
+          </div>
+          <div class="field-body">
+            <small>Name: {{ field.name }}</small>
+            @if (field.options) {
+              <div><small>Options: {{ field.options.join(', ') }}</small></div>
+            }
+          </div>
+        </div>
+      }
+      @if (!hasFields()) {
+        <div class="no-fields">
+          Добавьте поля, чтобы увидеть их здесь.
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="json-section">
+    <h3>JSON-конфигурация:</h3>
+    <pre>{{ formFields() | json }}</pre>
+  </div>
+</div>
