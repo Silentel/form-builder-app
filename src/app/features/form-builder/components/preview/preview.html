@@ -1,9 +1,12 @@
+@let fields = fields$ | async;
+@let fieldList = fields || [];
+
 <div class="preview-container">
   <h2>Режим просмотра</h2>
 
-  @if (hasFields() && dynamicForm) {
+  @if (fieldList.length > 0 && dynamicForm) {
     <form [formGroup]="dynamicForm" (ngSubmit)="onSubmit()" class="dynamic-form">
-      @for (field of formFields(); track field.name) {
+      @for (field of fieldList; track field.name) {
       <div class="form-group">
         <label [for]="field.name">{{ field.label }} @if (field.required) {<span class="required-asterisk">*</span>}</label>
 
@@ -58,7 +61,7 @@
       <button type="submit" class="btn btn-success">Отправить</button>
     </form>
   }
-  @if (!hasFields()) {
+  @if (fieldList.length === 0) {
     <div class="no-config">
       <p>Конфигурация формы пуста. Перейдите в <a routerLink="/builder">режим конструктора</a>, чтобы добавить поля.</p>
     </div>

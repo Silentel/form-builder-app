@@ -1,8 +1,8 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { FormData } from '../../models/field';
-import { FormConstructor } from '../../services/form-constructor';
+import { FormBuilderFacade } from '../../store/form-builder.facade';
 
 @Component({
   selector: 'app-preview',
@@ -13,34 +13,34 @@ import { FormConstructor } from '../../services/form-constructor';
 })
 export class Preview {
   private fb = inject(FormBuilder);
-  private formBuilderService = inject(FormConstructor);
+  private facade = inject(FormBuilderFacade);
 
-  formFields = this.formBuilderService.formFields;
+  fields$ = this.facade.fields$;
   dynamicForm!: FormGroup;
   submittedData: FormData | null = null;
 
-  hasFields = computed(() => this.formFields().length > 0);
-
   ngOnInit(): void {
     this.createForm();
+    this.fields$.subscribe(() => this.createForm());
   }
 
   createForm(): void {
-    const group: { [key: string]: AbstractControl } = {};
-    const currentFields = this.formFields();
+    this.fields$.subscribe(fields => {
+      const group: { [key: string]: AbstractControl } = {};
 
-    currentFields.forEach(field => {
-      const validators = [];
-      if (field.required) {
-        validators.push(Validators.required);
-      }
-      if (field.type === 'email') {
-        validators.push(Validators.email);
-      }
-      group[field.name] = this.fb.control(null, validators);
-    });
+      fields.forEach(field => {
+        const validators = [];
+        if (field.required) {
+          validators.push(Validators.required);
+        }
+        if (field.type === 'email') {
+          validators.push(Validators.email);
+        }
+        group[field.name] = this.fb.control(null, validators);
+      });
 
-    this.dynamicForm = this.fb.group(group);
+      this.dynamicForm = this.fb.group(group);
+    }).unsubscribe();
   }
 
   onSubmit(): void {

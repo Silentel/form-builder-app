@@ -1,3 +1,6 @@
+@let fields = fields$ | async;
+@let fieldList = fields || [];
+
 <div class="builder-container">
   <h2>Режим конструктора</h2>
 
@@ -55,7 +58,7 @@
   <div class="preview-section">
     <h3>Превью формы:</h3>
     <div class="field-list">
-      @for (field of formFields(); track field.name; let i = $index) {
+      @for (field of fieldList; track field.name; let i = $index) {
         <div class="field-item" animate.enter="animate-in" animate.leave="animate-out">
           <div class="field-header">
             <strong>{{ field.label }}</strong> ({{ field.type }}) @if (field.required) {<span class="required-asterisk">*</span>}
@@ -72,7 +75,7 @@
           </div>
         </div>
       }
-      @if (!hasFields()) {
+      @if (fieldList.length === 0) {
         <div class="no-fields">
           Добавьте поля, чтобы увидеть их здесь.
         </div>
@@ -82,6 +85,6 @@
 
   <div class="json-section">
     <h3>JSON-конфигурация:</h3>
-    <pre>{{ formFields() | json }}</pre>
+    <pre>{{ fieldList | json }}</pre>
   </div>
 </div>

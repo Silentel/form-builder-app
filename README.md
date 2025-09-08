@@ -57,3 +57,7 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## State Management
+
+This project has been refactored to a feature-based structure and includes an NgRx store for the form-builder feature.

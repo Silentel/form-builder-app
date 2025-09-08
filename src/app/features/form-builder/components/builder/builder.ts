@@ -1,8 +1,8 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Field } from '../../models/field';
-import { FormConstructor } from '../../services/form-constructor';
+import { FormBuilderFacade } from '../../store/form-builder.facade';
 
 @Component({
   selector: 'app-builder',
@@ -13,14 +13,12 @@ import { FormConstructor } from '../../services/form-constructor';
 })
 export class Builder {
   private fb = inject(FormBuilder);
-  private formConstructorService = inject(FormConstructor);
+  private facade = inject(FormBuilderFacade);
 
   fieldForm: FormGroup;
   fieldTypes = ['text', 'textarea', 'checkbox', 'select', 'email', 'number'];
   editingIndex: number | null = null;
-
-  formFields = this.formConstructorService.formFields;
-  hasFields = computed(() => this.formFields().length > 0);
+  fields$ = this.facade.fields$;
 
   constructor() {
     this.fieldForm = this.fb.group({
@@ -44,26 +42,28 @@ export class Builder {
       };
 
       if (this.editingIndex !== null) {
-        this.formConstructorService.updateField(this.editingIndex, newField);
+        this.facade.updateField(this.editingIndex, newField);
         this.editingIndex = null;
       } else {
-        this.formConstructorService.addField(newField);
+        this.facade.addField(newField);
       }
       this.fieldForm.reset({ type: 'text', required: false });
     }
   }
 
   editField(index: number): void {
-    const field = this.formFields()[index];
-    this.fieldForm.patchValue({
-      ...field,
-      options: field.options ? field.options.join(',') : ''
-    });
-    this.editingIndex = index;
+    this.facade.fields$.subscribe(fields => {
+      const field = fields[index];
+      this.fieldForm.patchValue({
+        ...field,
+        options: field.options ? field.options.join(',') : ''
+      });
+      this.editingIndex = index;
+    }).unsubscribe();
   }
 
   deleteField(index: number): void {
-    this.formConstructorService.removeField(index);
+    this.facade.removeField(index);
     if (this.editingIndex === index) {
       this.cancelEdit();
     }
